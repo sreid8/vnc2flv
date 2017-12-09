@@ -13,18 +13,18 @@ from vnc2flv.video import FLVVideoSink, str2clip, str2size
 
 ##  flvrec
 ##
-def flvrec(filename, host='localhost', port=5900,
+def flvrec(output_stream, host='localhost', port=5900,
            framerate=12, keyframe=120,
            preferred_encoding=(0,), pwdfile=None,
            blocksize=32, clipping=None,
            cmdline=None,
            debug=0, verbose=1):
-    fp = file(filename, 'wb')
+
     if pwdfile:
         pwdcache = PWDFile(pwdfile)
     else:
         pwdcache = PWDCache('%s:%d' % (host,port))
-    writer = FLVWriter(fp, framerate=framerate, debug=debug)
+    writer = FLVWriter(output_stream, framerate=framerate, debug=debug)
     sink = FLVVideoSink(writer,
                         blocksize=blocksize, framerate=framerate, keyframe=keyframe,
                         clipping=clipping, debug=debug)
@@ -64,7 +64,7 @@ def flvrec(filename, host='localhost', port=5900,
     if verbose:
         print >>sys.stderr, 'stop recording'
     writer.close()
-    fp.close()
+    output_stream.close()
     return retval
 
 
@@ -117,7 +117,9 @@ def main(argv):
             host = args[0]
     if 2 <= len(args):
         port = int(args[1])
-    return flvrec(filename, host, port, framerate=framerate, keyframe=keyframe,
+    #make the file output stream
+    fp = open(filename, 'wb')
+    return flvrec(fp, host, port, framerate=framerate, keyframe=keyframe,
                   preferred_encoding=preferred_encoding, pwdfile=pwdfile,
                   blocksize=blocksize, clipping=clipping, cmdline=cmdline,
                   debug=debug, verbose=verbose)
